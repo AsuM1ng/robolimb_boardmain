@@ -432,6 +432,16 @@
               <FilePath>.\system_stm32f4xx.c</FilePath>
             </File>
             <File>
+              <FileName>sdo_frames.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\sdo_frames.c</FilePath>
+            </File>
+            <File>
+              <FileName>sdo_frames.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\sdo_frames.h</FilePath>
+            </File>
+            <File>
               <FileName>main.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\main.h</FilePath>

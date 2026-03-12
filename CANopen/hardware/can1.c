@@ -64,7 +64,7 @@ unsigned char CAN1_Init(CO_Data * d, uint32_t bitrate)
   	CAN_InitStructure.CAN_BS1 = CAN_BS1_3tq;
   	CAN_InitStructure.CAN_BS2 = CAN_BS2_3tq;
   }
-  else {	//除去1M频率。剩下都配置为500K
+  else {	//去1M频省剩露为500K
   	CAN_InitStructure.CAN_BS1 = CAN_BS1_6tq;
   	CAN_InitStructure.CAN_BS2 = CAN_BS2_7tq;
   }
@@ -133,31 +133,25 @@ void CAN1_RX0_IRQHandler(void)
 	Message rxm = {0};
 	CAN_Receive(CAN1, CAN_FIFO0, &RxMessage);
 	// Drop extended frames
-	if(RxMessage.IDE == CAN_ID_EXT) //不处理扩展帧
+	if(RxMessage.IDE == CAN_ID_EXT) //展帧
 		return;
 	rxm.cob_id = RxMessage.StdId;
-  	if(RxMessage.RTR == CAN_RTR_REMOTE)//远程帧
+  	if(RxMessage.RTR == CAN_RTR_REMOTE)//远帧
 		rxm.rtr = 1;
 	rxm.len = RxMessage.DLC;
 	for(i=0 ; i<rxm.len ; i++)
   		 rxm.data[i] = RxMessage.Data[i];
 		
-		/*****这里是自己的数据接收部分*******/
-	if( rxm.cob_id>>7==0xB)	//快速SDO回应ID为0x580+对方id, 右移7位即为0xB 
+		/*****约萁詹*******/
+	if( rxm.cob_id>>7==0xB)	// SDO response: 0x580 + node id
 	{
-		int16_t test=0;
-		switch(rxm.cob_id)
-		{
-			case 0x582:
-				test=rxm.data[4]|rxm.data[5]<<8;
-				printf("test=%d,\r\n",test);	//其实在中断不应该使用打印函数的，这里是方便调试而已
-				break;
-			default:
-				break;
+		if (rxm.cob_id >= 0x581 && rxm.cob_id <= 0x584) {
+			printf("SDO resp COB-ID=0x%03X cmd=0x%02X idx=0x%02X%02X\r\n",
+					rxm.cob_id, rxm.data[0], rxm.data[2], rxm.data[1]);
 		}
-	
+		canDispatch(co_data, &rxm);
 	}
 	else
-		canDispatch(co_data, &rxm);//CANopen自身的处理函数，因为快速SDO不需要反馈，所以在上边处理后就不需要调用这步了
+		canDispatch(co_data, &rxm);
 }
 
