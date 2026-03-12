@@ -1,0 +1,30 @@
+#include "sdo_frames.h"
+#include "can_driver.h"
+#include <string.h>
+
+const SDO_Frame SDO_ACTIVATE_PPM      = {5, {0x2F,0x60,0x60,0x00,0x01}};
+const SDO_Frame SDO_DISABLE           = {6, {0x2B,0x40,0x60,0x00,0x06,0x00}};
+const SDO_Frame SDO_ENABLE            = {6, {0x2B,0x40,0x60,0x00,0x0F,0x00}};
+const SDO_Frame SDO_GO                = {6, {0x2B,0x40,0x60,0x00,0x5F,0x00}};
+
+/* 下面按节点拆分目标位置/速度报文，可继续扩展 */
+const SDO_Frame SDO_TARGET_POS_NODE1  = {8, {0x23,0x7A,0x60,0x00,0x10,0x27,0x00,0x00}};
+const SDO_Frame SDO_TARGET_POS_NODE2  = {8, {0x23,0x7A,0x60,0x00,0x20,0x4E,0x00,0x00}};
+const SDO_Frame SDO_TARGET_POS_NODE3  = {8, {0x23,0x7A,0x60,0x00,0x30,0x75,0x00,0x00}};
+const SDO_Frame SDO_TARGET_POS_NODE4  = {8, {0x23,0x7A,0x60,0x00,0x40,0x9C,0x00,0x00}};
+
+UNS8 send_sdo_to_node(UNS8 node_id, const SDO_Frame *frame)
+{
+    Message tx = {0};
+
+    if (frame == 0 || frame->len > SDO_MAX_DATA_LEN) {
+        return 0;
+    }
+
+    tx.cob_id = 0x600 + node_id; /* 例如 node_id=1 => 0x601 */
+    tx.len = frame->len;
+    tx.rtr = 0;
+    memcpy(tx.data, frame->data, frame->len);
+
+    return canSend(0, &tx);
+}

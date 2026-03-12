@@ -1,132 +1,55 @@
-#include "sys.h"	
-#include "main.h"		
-
-////¼¤»îPPM
-//unsigned char activ_PPM[5]={0x2F,0x60,0x60,0x00,0x01};
-////¼¤»îPVM
-//unsigned char activ_PVM[5]={0x2F,0x60,0x60,0x00,0x03};
-////¿ØÖÆÆ÷È¥Ê¹ÄÜ
-//unsigned char EPOS_disable[6] = {0x2B,0x40,0x60,0x00,0x06,0x00};
-////¿ØÖÆÆ÷Ê¹ÄÜ
-//unsigned char EPOS_enable[6] = {0x2B,0x40,0x60,0x00,0x0F,0x00};
-////ÉèÖÃÄ¿±ê×ªËÙÎª-10rpm
-//unsigned char target_speed_1000rpm[8] = {0x23,0xFF,0x60,0x00,0xF6,0xFF,0xFF,0xFF};
-////¶ÁÈ¡Êµ¼Ê×ªËÙ
-//unsigned char read_actual_speed[4] = {0x40,0xD3,0x30,0x01};
-
-
-////ÉèÖÃ¶¯×÷1_¼ç¹Ø½Ú_ÆğÊÆ_Õı×ª_ËÙ¶È20rpm
-//unsigned char shoulder_start_forward_20rpm[8] = {0x23,0xFF,0x60,0x00,0x14,0x00,0x00,0x00};
-////ÉèÖÃ¶¯×÷1_¼ç¹Ø½Ú_Íù¸´_Õı×ª_ËÙ¶È90rpm
-//unsigned char shoulder_circulate_forward_90rpm[8] = {0x23,0xFF,0x60,0x00,0x5A,0x00,0x00,0x00};
-////ÉèÖÃ¶¯×÷1_¼ç¹Ø½Ú_ÆğÊÆ_·´×ª_ËÙ¶È90rpm
-//unsigned char shoulder_circulate_reverse_90rpm[8] = {0x23,0xFF,0x60,0x00,0xA6,0xFF,0xFF,0xFF};
-////ÉèÖÃ¶¯×÷1_Öâ¹Ø½Ú_ËÙ¶È£¨·½Ïò´ıÃ÷È·£©_83rpm
-//unsigned char elbow_circulate_reverse_83rpm[8] = {0x23,0xFF,0x60,0x00,0x53,0x00,0x00,0x00};
-//		
-
-////ÉèÖÃ¹Ø½Ú×ª³öËÙ¶È120
-//unsigned char shoulder_horizen_120rpm[8] = {0x23,0x81,0x60,0x00,0x78,0x00,0x00,0x00};
-////ÉèÖÃ¹Ø½ÚÄ¿±êËÙ¶È120
-//unsigned char shoulder_target_120rpm[8] = {0x23,0xFF,0x60,0x00,0x78,0x00,0x00,0x00};
-////¼ç¹Ø½ÚË®Æ½×ÔÓÉÎ»ÖÃ
-//unsigned char shoulder_horizen_position[8] = {0x23,0x7A,0x60,0x00,0x00,0x00,0x00,0x00};
-////¾ø¶ÔÎ»ÖÃÄ£Ê½ÉèÖÃ
-//unsigned char absolut_position[6] = {0x2B,0x40,0x60,0x00,0x1F,0x00};
-
-
-////PPMHalt
-//unsigned char PPM_Halt[6] = {0x2B,0x40,0x60,0x00,0x0F,0x01};
-////PVMHalt
-//unsigned char PVM_Halt[6] = {0x2B,0x40,0x60,0x00,0x0F,0x01};
-
-void motor_1000rmp_10s();
+#include "sys.h"
+#include "main.h"
+#include "sdo_frames.h"
 
 int main(void)
-{ 
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);//ÉèÖÃÏµÍ³ÖĞ¶ÏÓÅÏÈ¼¶·Ö×é4
-	delay_init(168);    	//³õÊ¼»¯ÑÓÊ±º¯Êı
-	
+{
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
+    delay_init(168);
 
-	CAN1_Init(&Master_Data,1000000);
-	TIM2_Init();
-	USART1_Init(115200);
-	
-	unsigned char nodeID = 0x01;                   //½ÚµãID
-  setNodeId(&Master_Data, nodeID);
-  setState(&Master_Data, Initialisation);				//½Úµã³õÊ¼»¯
-  setState(&Master_Data, Operational);		
+    CAN1_Init(&Master_Data,1000000);
+    TIM2_Init();
+    USART1_Init(115200);
 
-		//¼¤»îPPM
-		unsigned char activ_PPM[5]={0x2F,0x60,0x60,0x00,0x01};
-		//¿ØÖÆÆ÷È¥Ê¹ÄÜ
-		unsigned char EPOS_disable[6] = {0x2B,0x40,0x60,0x00,0x06,0x00};
-		//¿ØÖÆÆ÷Ê¹ÄÜ
-		unsigned char EPOS_enable[6] = {0x2B,0x40,0x60,0x00,0x0F,0x00};
-		//ÉèÖÃÄ¿±ê×ªËÙÎª1000rpm
-		unsigned char target_speed_1000rpm[8] = {0x23,0x81,0x60,0x00,0xE8,0x03,0x00,0x00};
-		unsigned char target_speed_500rpm[8] = {0x23, 0x81, 0x60, 0x00, 0xF4, 0x01, 0x00, 0x00};
-		//¶ÁÈ¡Êµ¼Ê×ªËÙ
-		unsigned char read_actual_speed[4] = {0x40,0xD3,0x30,0x01};
-		//¶ÁÈ¡µ±Ç°Î»ÖÃ
-		unsigned char read_actual_place[4] = {0x40,0x64,0x60,0x00};
-		////ÉèÖÃÄ¿±êÎ»ÖÃ
-		unsigned char shoulder_target_100qc[8] = {0x23, 0x7A, 0x60, 0x00, 0x64, 0x00, 0x00, 0x00};
-		unsigned char shoulder_target_un100qc[8] = {0x23, 0x7A, 0x60, 0x00, 0x9C, 0xFF, 0xFF, 0xFF};
-		
-		unsigned char shoulder_target_1000qc[8] = {0x23,0x7A,0x60,0x00,0xE8,0x03,0x00,0x00};
-		unsigned char shoulder_target_un1000qc[8] = {0x23, 0x7A, 0x60, 0x00, 0x18, 0xFC, 0xFF, 0xFF};
-		
-		unsigned char shoulder_target_2000qc[8] = {0x23, 0x7A, 0x60, 0x00, 0xD0, 0x07, 0x00, 0x00};
-		unsigned char shoulder_target_un2000qc[8] = {0x23, 0x7A, 0x60, 0x00, 0x30, 0xF8, 0xFF, 0xFF};
+    setNodeId(&Master_Data, 0x01);
+    setState(&Master_Data, Initialisation);
+    setState(&Master_Data, Operational);
 
-		
-		unsigned char shoulder_target_2500qc[8] = {0x23, 0x7A, 0x60, 0x00, 0xC4, 0x09, 0x00, 0x00};
-		unsigned char shoulder_target_un2500qc[8] = {0x23, 0x7A, 0x60, 0x00, 0x3C, 0xF6, 0xFF, 0xFF};
-		
-		unsigned char shoulder_target_5000qc[8] = {0x23, 0x7A, 0x60, 0x00, 0x88, 0x13, 0x00, 0x00};
-		unsigned char shoulder_target_un5000qc[8] = {0x23, 0x7A, 0x60, 0x00, 0x78, 0xEC, 0xFF, 0xFF};
+    while(1)
+    {
+        /*
+         * ä¾æ¬¡å‘å¾€ 0x601~0x604ï¼ˆä¸åŒèŠ‚ç‚¹ä¸åŒæŠ¥æ–‡ï¼‰ã€‚
+         * CAN æ€»çº¿ç‰©ç†ä¸Šæ— æ³•â€œåŒä¸€æ—¶åˆ»â€å‘é€ï¼Œåªèƒ½é€šè¿‡è¿ç»­å…¥é˜Ÿå®ç°è¿‘ä¼¼å¹¶å‘ã€‚
+         */
+        send_sdo_to_node(0x01, &SDO_ACTIVATE_PPM);
+        send_sdo_to_node(0x02, &SDO_ACTIVATE_PPM);
+        send_sdo_to_node(0x03, &SDO_ACTIVATE_PPM);
+        send_sdo_to_node(0x04, &SDO_ACTIVATE_PPM);
+        delay_ms(5);
 
-		unsigned char shoulder_target_10000qc[8] = {0x23,0x7A,0x60,0x00,0x10,0x27,0x00,0x00};
-		unsigned char shoulder_target_un10000qc[8] = {0x23, 0x7A, 0x60, 0x00, 0xF0, 0xD8, 0xFF, 0xFF};
-		
-		unsigned char shoulder_target_50000qc[8] = {0x23, 0x7A, 0x60, 0x00, 0x50, 0xC3, 0x00, 0x00};
-		unsigned char shoulder_target_un50000qc[8] = {0x23, 0x7A, 0x60, 0x00, 0xB0, 0x3C, 0xFF, 0xFF};
-		////ÉèÖÃÄ¿±êÎ»ÖÃ
-		unsigned char shoulder_target_20000qc[8] = {0x23,0x7A,0x60,0x00,0x10,0x27,0x00,0x00};
-		//GO
-		unsigned char activ_PPM_GO[6] = {0x2B,0x40,0x60,0x00,0x5F,0x00};
+        send_sdo_to_node(0x01, &SDO_DISABLE);
+        send_sdo_to_node(0x02, &SDO_DISABLE);
+        send_sdo_to_node(0x03, &SDO_DISABLE);
+        send_sdo_to_node(0x04, &SDO_DISABLE);
+        delay_ms(5);
 
-		while(1)
-	{
-		delay_ms(1000);
-		sendSDO(&Master_Data,SDO_CLIENT,0,activ_PPM);
-		delay_ms(10);
-		sendSDO(&Master_Data,SDO_CLIENT,0,target_speed_1000rpm);
-		delay_ms(10);
-		sendSDO(&Master_Data,SDO_CLIENT,0,EPOS_disable);
-		delay_ms(10);
-		sendSDO(&Master_Data,SDO_CLIENT,0,EPOS_enable);
-		delay_ms(10);
-		sendSDO(&Master_Data,SDO_CLIENT,0,shoulder_target_un10000qc);
-		delay_ms(10);
-		sendSDO(&Master_Data,SDO_CLIENT,0,activ_PPM_GO);
-		delay_ms(3000);
-		
-		
-		sendSDO(&Master_Data,SDO_CLIENT,0,EPOS_disable);
-		delay_ms(10);
-		sendSDO(&Master_Data,SDO_CLIENT,0,EPOS_enable);
-		delay_ms(10);
-		sendSDO(&Master_Data,SDO_CLIENT,0,shoulder_target_10000qc);
-		delay_ms(10);
-		sendSDO(&Master_Data,SDO_CLIENT,0,activ_PPM_GO);
-		delay_ms(4000);
-//		sendSDO(&Master_Data,SDO_CLIENT,0,EPOS_disable);
-//		delay_ms(1000);
+        send_sdo_to_node(0x01, &SDO_ENABLE);
+        send_sdo_to_node(0x02, &SDO_ENABLE);
+        send_sdo_to_node(0x03, &SDO_ENABLE);
+        send_sdo_to_node(0x04, &SDO_ENABLE);
+        delay_ms(5);
 
-	}
+        send_sdo_to_node(0x01, &SDO_TARGET_POS_NODE1);
+        send_sdo_to_node(0x02, &SDO_TARGET_POS_NODE2);
+        send_sdo_to_node(0x03, &SDO_TARGET_POS_NODE3);
+        send_sdo_to_node(0x04, &SDO_TARGET_POS_NODE4);
+        delay_ms(5);
+
+        send_sdo_to_node(0x01, &SDO_GO);
+        send_sdo_to_node(0x02, &SDO_GO);
+        send_sdo_to_node(0x03, &SDO_GO);
+        send_sdo_to_node(0x04, &SDO_GO);
+
+        delay_ms(1000);
+    }
 }
-
-
-
