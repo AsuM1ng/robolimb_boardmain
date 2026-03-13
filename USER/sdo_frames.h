@@ -15,10 +15,10 @@ extern const SDO_Frame SDO_ACTIVATE_PPM;
 extern const SDO_Frame SDO_DISABLE;
 extern const SDO_Frame SDO_ENABLE;
 extern const SDO_Frame SDO_GO;
-extern const SDO_Frame SDO_TARGET_POS_NODE1;
-extern const SDO_Frame SDO_TARGET_POS_NODE2;
-extern const SDO_Frame SDO_TARGET_POS_NODE3;
-extern const SDO_Frame SDO_TARGET_POS_NODE4;
+extern const SDO_Frame SDO_TARGET_POS_NODE10000;
+extern const SDO_Frame SDO_TARGET_POS_NODE1000;
+extern const SDO_Frame SDO_TARGET_POS_NODE2000;
+extern const SDO_Frame SDO_TARGET_POS_NODE5000;
 
 UNS8 send_sdo_to_node(UNS8 node_id, const SDO_Frame *frame);
 
