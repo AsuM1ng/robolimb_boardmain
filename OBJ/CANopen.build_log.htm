@@ -3,109 +3,34 @@
 <pre>
 <h1>µVision Build Log</h1>
 <h2>Tool Versions:</h2>
-IDE-Version: ¦ÌVision V5.17.0.0
-Copyright (C) 2015 ARM Ltd and ARM Germany GmbH. All rights reserved.
-License Information: Asuka Ming, gfkd, LIC=76FUH-WJKP9-SYMVA-1YW22-GX9RI-1XU5Z
+IDE-Version: ¦ÌVision V5.43.1.0
+Copyright (C) 2025 ARM Ltd and ARM Germany GmbH. All rights reserved.
+License Information: A 2285146162@qq.com, IBME, LIC=IK1BF-6P8TK-Z9PG9-4KGC4-MG392-0Y7LT
  
 Tool Versions:
-Toolchain:       MDK-ARM Standard  Version: 5.17
-Toolchain Path:  T:\Keil uVision5.17\ARM\ARMCC\Bin
-C Compiler:      Armcc.exe V5.06 update 1 (build 61)
-Assembler:       Armasm.exe V5.06 update 1 (build 61)
-Linker/Locator:  ArmLink.exe V5.06 update 1 (build 61)
-Library Manager: ArmAr.exe V5.06 update 1 (build 61)
-Hex Converter:   FromElf.exe V5.06 update 1 (build 61)
-CPU DLL:         SARMCM3.DLL V5.17
-Dialog DLL:      DCM.DLL V1.13.4.0
-Target DLL:      STLink\ST-LINKIII-KEIL_SWO.dll V2.0.18.0
-Dialog DLL:      TCM.DLL V1.14.6.0
+Toolchain:       MDK-ARM Plus  Version: 5.43.0.0
+Toolchain Path:  D:\KEIL\Keil_v5\ARM\ARMCLANG\bin\
+C Compiler:      ArmClang.exe V6.24
+Assembler:       Armasm.exe V6.24
+Linker/Locator:  ArmLink.exe V6.24
+Library Manager: ArmAr.exe V6.24
+Hex Converter:   FromElf.exe V6.24
+CPU DLL:         SARMCM3.DLL V5.43.0.0
+Dialog DLL:      DCM.DLL V1.17.5.0
+Target DLL:      STLink\ST-LINKIII-KEIL_SWO.dll V3.3.1.0
+Dialog DLL:      TCM.DLL V1.56.6.0
  
 <h2>Project:</h2>
 D:\workwork\CODE\robolimb_boardmain\USER\CANopen.uvprojx
-Project File Date:  01/30/2026
+Project File Date:  03/13/2026
 
 <h2>Output:</h2>
-*** Using Compiler 'V5.06 update 1 (build 61)', folder: 'T:\Keil uVision5.17\ARM\ARMCC\Bin'
-Rebuild target 'CANpen'
-assembling startup_stm32f40_41xxx.s...
-compiling stm32f4xx_it.c...
-compiling main.c...
-main.c(43): warning:  #1295-D: Deprecated declaration motor_1000rmp_10s - give arg types
-  void motor_1000rmp_10s();
-main.c(68): warning:  #177-D: variable "target_speed_500rpm" was declared but never referenced
-  		unsigned char target_speed_500rpm[8] = {0x23, 0x81, 0x60, 0x00, 0xF4, 0x01, 0x00, 0x00};
-main.c(70): warning:  #177-D: variable "read_actual_speed" was declared but never referenced
-  		unsigned char read_actual_speed[4] = {0x40,0xD3,0x30,0x01};
-main.c(72): warning:  #177-D: variable "read_actual_place" was declared but never referenced
-  		unsigned char read_actual_place[4] = {0x40,0x64,0x60,0x00};
-main.c(74): warning:  #177-D: variable "shoulder_target_100qc" was declared but never referenced
-  		unsigned char shoulder_target_100qc[8] = {0x23, 0x7A, 0x60, 0x00, 0x64, 0x00, 0x00, 0x00};
-main.c(75): warning:  #177-D: variable "shoulder_target_un100qc" was declared but never referenced
-  		unsigned char shoulder_target_un100qc[8] = {0x23, 0x7A, 0x60, 0x00, 0x9C, 0xFF, 0xFF, 0xFF};
-main.c(77): warning:  #177-D: variable "shoulder_target_1000qc" was declared but never referenced
-  		unsigned char shoulder_target_1000qc[8] = {0x23,0x7A,0x60,0x00,0xE8,0x03,0x00,0x00};
-main.c(78): warning:  #177-D: variable "shoulder_target_un1000qc" was declared but never referenced
-  		unsigned char shoulder_target_un1000qc[8] = {0x23, 0x7A, 0x60, 0x00, 0x18, 0xFC, 0xFF, 0xFF};
-main.c(80): warning:  #177-D: variable "shoulder_target_2000qc" was declared but never referenced
-  		unsigned char shoulder_target_2000qc[8] = {0x23, 0x7A, 0x60, 0x00, 0xD0, 0x07, 0x00, 0x00};
-main.c(81): warning:  #177-D: variable "shoulder_target_un2000qc" was declared but never referenced
-  		unsigned char shoulder_target_un2000qc[8] = {0x23, 0x7A, 0x60, 0x00, 0x30, 0xF8, 0xFF, 0xFF};
-main.c(84): warning:  #177-D: variable "shoulder_target_2500qc" was declared but never referenced
-  		unsigned char shoulder_target_2500qc[8] = {0x23, 0x7A, 0x60, 0x00, 0xC4, 0x09, 0x00, 0x00};
-main.c(85): warning:  #177-D: variable "shoulder_target_un2500qc" was declared but never referenced
-  		unsigned char shoulder_target_un2500qc[8] = {0x23, 0x7A, 0x60, 0x00, 0x3C, 0xF6, 0xFF, 0xFF};
-main.c(87): warning:  #177-D: variable "shoulder_target_5000qc" was declared but never referenced
-  		unsigned char shoulder_target_5000qc[8] = {0x23, 0x7A, 0x60, 0x00, 0x88, 0x13, 0x00, 0x00};
-main.c(88): warning:  #177-D: variable "shoulder_target_un5000qc" was declared but never referenced
-  		unsigned char shoulder_target_un5000qc[8] = {0x23, 0x7A, 0x60, 0x00, 0x78, 0xEC, 0xFF, 0xFF};
-main.c(93): warning:  #177-D: variable "shoulder_target_50000qc" was declared but never referenced
-  		unsigned char shoulder_target_50000qc[8] = {0x23, 0x7A, 0x60, 0x00, 0x50, 0xC3, 0x00, 0x00};
-main.c(94): warning:  #177-D: variable "shoulder_target_un50000qc" was declared but never referenced
-  		unsigned char shoulder_target_un50000qc[8] = {0x23, 0x7A, 0x60, 0x00, 0xB0, 0x3C, 0xFF, 0xFF};
-main.c(96): warning:  #177-D: variable "shoulder_target_20000qc" was declared but never referenced
-  		unsigned char shoulder_target_20000qc[8] = {0x23,0x7A,0x60,0x00,0x10,0x27,0x00,0x00};
-main.c: 17 warnings, 0 errors
-compiling sys.c...
-compiling stm32f4xx_can.c...
-compiling stm32f4xx_gpio.c...
-compiling misc.c...
-compiling stm32f4xx_syscfg.c...
-compiling delay.c...
-compiling stm32f4xx_usart.c...
-compiling stm32f4xx_fsmc.c...
-compiling stm32f4xx_spi.c...
-compiling usart.c...
-compiling system_stm32f4xx.c...
-compiling stm32f4xx_rcc.c...
-compiling stm32f4xx_sdio.c...
-compiling dcf.c...
-compiling emcy.c...
-compiling lifegrd.c...
-compiling nmtMaster.c...
-compiling lss.c...
-compiling nmtSlave.c...
-compiling objacces.c...
-compiling stm32f4xx_tim.c...
-compiling states.c...
-compiling sync.c...
-compiling pdo.c...
-compiling timer.c...
-compiling Master.c...
-compiling stm32f4xx_dma.c...
-compiling sdo.c...
-compiling can1.c...
-compiling timer2.c...
-linking...
-Program Size: Code=51160 RO-data=2572 RW-data=972 ZI-data=1828  
-FromELF: creating hex file...
-"..\OBJ\CANopen.axf" - 0 Error(s), 17 Warning(s).
-
-<h2>Collection of Component include folders:</h2>
-  D:\workwork\CODE\robolimb_boardmain\USER\RTE
-  T:\Keil uVision5.17\ARM\PACK\Keil\STM32F4xx_DFP\2.6.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include
-
-<h2>Collection of Component Files used:</h2>
-Build Time Elapsed:  00:00:04
+*** Target 'CANpen' uses ARM-Compiler 'Default Compiler Version 5' which is not available.
+*** Please review the installed ARM Compiler Versions:
+   'Manage Project Items - Folders/Extensions' to manage ARM Compiler Versions.
+   'Options for Target - Target' to select an ARM Compiler Version for the target.
+*** Rebuild aborted.
+Build Time Elapsed:  00:00:00
 </pre>
 </body>
 </html>

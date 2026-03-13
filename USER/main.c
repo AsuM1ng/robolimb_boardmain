@@ -19,7 +19,7 @@ int main(void)
     {
         /*
          * 依次发往 0x601~0x604（不同节点不同报文）。
-         * CAN 总线物理上无法“同一时刻”发送，只能通过连续入队实现近似并发。
+         * 0x01：肩水平
          */
         send_sdo_to_node(0x01, &SDO_ACTIVATE_PPM);
         send_sdo_to_node(0x02, &SDO_ACTIVATE_PPM);
@@ -39,10 +39,10 @@ int main(void)
         send_sdo_to_node(0x04, &SDO_ENABLE);
         delay_ms(5);
 
-        send_sdo_to_node(0x01, &SDO_TARGET_POS_NODE1);
-        send_sdo_to_node(0x02, &SDO_TARGET_POS_NODE2);
-        send_sdo_to_node(0x03, &SDO_TARGET_POS_NODE3);
-        send_sdo_to_node(0x04, &SDO_TARGET_POS_NODE4);
+        send_sdo_to_node(0x01, &SDO_TARGET_POS_NODE10000);
+        send_sdo_to_node(0x02, &SDO_TARGET_POS_NODE10000);
+        send_sdo_to_node(0x03, &SDO_TARGET_POS_NODE10000);
+        send_sdo_to_node(0x04, &SDO_TARGET_POS_NODE10000);
         delay_ms(5);
 
         send_sdo_to_node(0x01, &SDO_GO);

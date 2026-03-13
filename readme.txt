@@ -1,3 +1,14 @@
+git指令：
+ssh -T git@github.com
+
+$ git clone 复制的ssh地址
+
+git status
+git add .
+git commit -m "first commit"
+git remote 
+git push origin main
+
 实验器材:
 	探索者STM32F4开发板
 	
