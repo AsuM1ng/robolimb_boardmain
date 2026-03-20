@@ -8,15 +8,16 @@
 #include <string.h>
 #include "usart.h"
 
-
-/*****CANopen Ïà¹ØÍ·ÎÄ¼þ********/
-
+/*****CANopen å¤´æ–‡ä»¶********/
 #include "can1.h"
 #include "timer2.h"
 #include "timer3.h"
 #include "data.h"
 #include "Master.h"
 #include "canfestival.h"
+#include "stm32f4xx_exti.h"
+#include "stm32f4xx_syscfg.h"
+
+void board_app_init(void);
+
 #endif
-
-
