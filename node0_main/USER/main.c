@@ -1,13 +1,12 @@
-#include "main.h"	
+#include "main.h"
 
 PressFlag pressf;
 
 int main(void)
-{ 
-	sys_init();
+{
+    board_app_init();
 
-	while(1)
-	{
-		key_driver_task();
-	}
+    while (1)
+    {
+    }
 }
