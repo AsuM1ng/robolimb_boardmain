@@ -12,7 +12,7 @@
 #include "key.h"
 
 
-/*****CANopen Ïà¹ØÍ·ÎÄ¼ş********/
+/*****CANopen ç›¸å…³å¤´æ–‡ä»¶********/
 
 #include "dual_can.h"
 #include "timer2.h"
@@ -23,9 +23,8 @@
 #include "Slaver.h"
 #include "canfestival.h"
 #include "master_control_word.h"
-#include "key_drive_task.h"
 
-/**********È«¾Ö±äÁ¿¶¨Òå********/
+/**********å…¨å±€å˜é‡å®šä¹‰********/
 
 typedef struct
 {
@@ -34,6 +33,9 @@ typedef struct
 	uint8_t wkup_flag;
 } PressFlag;
 extern PressFlag pressf;
+
+void board_app_init(void);
+void board_irq_init(void);
 
 //void (*can1RxCallback)(CAN_RxHeaderTypeDef*, uint8_t*);
 //void (*can2RxCallback)(CAN_RxHeaderTypeDef*, uint8_t*);

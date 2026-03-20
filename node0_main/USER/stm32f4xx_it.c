@@ -1,168 +1,244 @@
-/**
-  ******************************************************************************
-  * @file    Project/STM32F4xx_StdPeriph_Templates/stm32f4xx_it.c 
-  * @author  MCD Application Team
-  * @version V1.4.0
-  * @date    04-August-2014
-  * @brief   Main Interrupt Service Routines.
-  *          This file provides template for all exceptions handler and 
-  *          peripherals interrupt service routine.
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; COPYRIGHT 2014 STMicroelectronics</center></h2>
-  *
-  * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
-  * You may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at:
-  *
-  *        http://www.st.com/software_license_agreement_liberty_v2
-  *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  *
-  ******************************************************************************
-  */
-
-/* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_it.h"
- 
+#include "main.h"
+#include <string.h>
 
-/** @addtogroup Template_Project
-  * @{
-  */
+#define ACTION_NODE_COUNT     4
+#define SDO_MAX_DATA_LEN      8
+#define ACTION_FRAME_DELAY_MS 5
+#define ACTION_DEBOUNCE_MS    20
 
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
-/* Private function prototypes -----------------------------------------------*/
-/* Private functions ---------------------------------------------------------*/
+typedef struct {
+    UNS8 len;
+    UNS8 data[SDO_MAX_DATA_LEN];
+} SDO_Frame;
 
-/******************************************************************************/
-/*            Cortex-M4 Processor Exceptions Handlers                         */
-/******************************************************************************/
+static const SDO_Frame SDO_ACTIVATE_PPM = {5, {0x2F, 0x60, 0x60, 0x00, 0x01}};
+static const SDO_Frame SDO_DISABLE = {6, {0x2B, 0x40, 0x60, 0x00, 0x06, 0x00}};
+static const SDO_Frame SDO_ENABLE = {6, {0x2B, 0x40, 0x60, 0x00, 0x0F, 0x00}};
+static const SDO_Frame SDO_GO = {6, {0x2B, 0x40, 0x60, 0x00, 0x5F, 0x00}};
 
-/**
-  * @brief  This function handles NMI exception.
-  * @param  None
-  * @retval None
-  */
+static const SDO_Frame SDO_TARGET_POS_10000 = {8, {0x23, 0x7A, 0x60, 0x00, 0x10, 0x27, 0x00, 0x00}};
+static const SDO_Frame SDO_TARGET_POS_1000 = {8, {0x23, 0x7A, 0x60, 0x00, 0xE8, 0x03, 0x00, 0x00}};
+static const SDO_Frame SDO_TARGET_POS_2000 = {8, {0x23, 0x7A, 0x60, 0x00, 0xD0, 0x07, 0x00, 0x00}};
+static const SDO_Frame SDO_TARGET_POS_5000 = {8, {0x23, 0x7A, 0x60, 0x00, 0x88, 0x13, 0x00, 0x00}};
+
+static volatile uint8_t action_is_busy = 0;
+
+static UNS8 send_sdo_to_node(UNS8 node_id, const SDO_Frame *frame)
+{
+    Message tx = {0};
+
+    if ((frame == 0) || (frame->len > SDO_MAX_DATA_LEN)) {
+        return 0;
+    }
+
+    tx.cob_id = 0x600 + node_id;
+    tx.len = frame->len;
+    tx.rtr = 0;
+    memcpy(tx.data, frame->data, frame->len);
+
+    return canSend(CAN1, &tx);
+}
+
+static void send_common_frame_to_action_nodes(const SDO_Frame *frame)
+{
+    UNS8 node_id;
+
+    if (frame == 0) {
+        return;
+    }
+
+    for (node_id = 1; node_id <= ACTION_NODE_COUNT; ++node_id) {
+        send_sdo_to_node(node_id, frame);
+    }
+}
+
+static void send_frame_to_action_nodes(const SDO_Frame *frames[ACTION_NODE_COUNT])
+{
+    UNS8 node_id;
+
+    if (frames == 0) {
+        return;
+    }
+
+    for (node_id = 0; node_id < ACTION_NODE_COUNT; ++node_id) {
+        if (frames[node_id] != 0) {
+            send_sdo_to_node(node_id + 1, frames[node_id]);
+        }
+    }
+}
+
+static void key_exti_init(void)
+{
+    EXTI_InitTypeDef exti_init_structure;
+    NVIC_InitTypeDef nvic_init_structure;
+
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+
+    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOC, EXTI_PinSource1);
+    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOC, EXTI_PinSource13);
+
+    EXTI_ClearITPendingBit(EXTI_Line1 | EXTI_Line13);
+
+    exti_init_structure.EXTI_Mode = EXTI_Mode_Interrupt;
+    exti_init_structure.EXTI_Trigger = EXTI_Trigger_Falling;
+    exti_init_structure.EXTI_LineCmd = ENABLE;
+
+    exti_init_structure.EXTI_Line = EXTI_Line1;
+    EXTI_Init(&exti_init_structure);
+
+    exti_init_structure.EXTI_Line = EXTI_Line13;
+    EXTI_Init(&exti_init_structure);
+
+    nvic_init_structure.NVIC_IRQChannel = EXTI1_IRQn;
+    nvic_init_structure.NVIC_IRQChannelPreemptionPriority = 1;
+    nvic_init_structure.NVIC_IRQChannelSubPriority = 0;
+    nvic_init_structure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&nvic_init_structure);
+
+    nvic_init_structure.NVIC_IRQChannel = EXTI15_10_IRQn;
+    nvic_init_structure.NVIC_IRQChannelPreemptionPriority = 1;
+    nvic_init_structure.NVIC_IRQChannelSubPriority = 1;
+    nvic_init_structure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&nvic_init_structure);
+}
+
+static void run_action_common_prefix(void)
+{
+    send_common_frame_to_action_nodes(&SDO_ACTIVATE_PPM);
+    delay_ms(ACTION_FRAME_DELAY_MS);
+
+    send_common_frame_to_action_nodes(&SDO_DISABLE);
+    delay_ms(ACTION_FRAME_DELAY_MS);
+
+    send_common_frame_to_action_nodes(&SDO_ENABLE);
+    delay_ms(ACTION_FRAME_DELAY_MS);
+}
+
+static void run_action_one(void)
+{
+    const SDO_Frame *target_frames[ACTION_NODE_COUNT] = {
+        &SDO_TARGET_POS_10000,
+        &SDO_TARGET_POS_10000,
+        &SDO_TARGET_POS_10000,
+        &SDO_TARGET_POS_10000
+    };
+
+    PDout(2) = 0;
+    PAout(8) = 1;
+
+    run_action_common_prefix();
+    send_frame_to_action_nodes(target_frames);
+    delay_ms(ACTION_FRAME_DELAY_MS);
+    send_common_frame_to_action_nodes(&SDO_GO);
+
+    PDout(2) = 1;
+}
+
+static void run_action_two(void)
+{
+    const SDO_Frame *target_frames[ACTION_NODE_COUNT] = {
+        &SDO_TARGET_POS_1000,
+        &SDO_TARGET_POS_2000,
+        &SDO_TARGET_POS_5000,
+        &SDO_TARGET_POS_10000
+    };
+
+    PAout(8) = 0;
+    PDout(2) = 1;
+
+    run_action_common_prefix();
+    send_frame_to_action_nodes(target_frames);
+    delay_ms(ACTION_FRAME_DELAY_MS);
+    send_common_frame_to_action_nodes(&SDO_GO);
+
+    PAout(8) = 1;
+}
+
+static void try_run_action(uint32_t exti_line)
+{
+    if (action_is_busy != 0) {
+        return;
+    }
+
+    action_is_busy = 1;
+    delay_ms(ACTION_DEBOUNCE_MS);
+
+    if ((exti_line == EXTI_Line1) && (GPIO_ReadInputDataBit(KEY0_GPIO_PORT, KEY0_GPIO_PIN) == Bit_RESET)) {
+        run_action_one();
+    }
+    else if ((exti_line == EXTI_Line13) && (GPIO_ReadInputDataBit(KEY1_GPIO_PORT, KEY1_GPIO_PIN) == Bit_RESET)) {
+        run_action_two();
+    }
+
+    action_is_busy = 0;
+}
+
 void NMI_Handler(void)
 {
 }
 
-/**
-  * @brief  This function handles Hard Fault exception.
-  * @param  None
-  * @retval None
-  */
 void HardFault_Handler(void)
 {
-  /* Go to infinite loop when Hard Fault exception occurs */
-  while (1)
-  {
-  }
+    while (1)
+    {
+    }
 }
 
-/**
-  * @brief  This function handles Memory Manage exception.
-  * @param  None
-  * @retval None
-  */
 void MemManage_Handler(void)
 {
-  /* Go to infinite loop when Memory Manage exception occurs */
-  while (1)
-  {
-  }
+    while (1)
+    {
+    }
 }
 
-/**
-  * @brief  This function handles Bus Fault exception.
-  * @param  None
-  * @retval None
-  */
 void BusFault_Handler(void)
 {
-  /* Go to infinite loop when Bus Fault exception occurs */
-  while (1)
-  {
-  }
+    while (1)
+    {
+    }
 }
 
-/**
-  * @brief  This function handles Usage Fault exception.
-  * @param  None
-  * @retval None
-  */
 void UsageFault_Handler(void)
 {
-  /* Go to infinite loop when Usage Fault exception occurs */
-  while (1)
-  {
-  }
+    while (1)
+    {
+    }
 }
 
-/**
-  * @brief  This function handles SVCall exception.
-  * @param  None
-  * @retval None
-  */
 void SVC_Handler(void)
 {
 }
 
-/**
-  * @brief  This function handles Debug Monitor exception.
-  * @param  None
-  * @retval None
-  */
 void DebugMon_Handler(void)
 {
 }
 
-/**
-  * @brief  This function handles PendSVC exception.
-  * @param  None
-  * @retval None
-  */
 void PendSV_Handler(void)
 {
 }
 
-/**
-  * @brief  This function handles SysTick Handler.
-  * @param  None
-  * @retval None
-  */
 void SysTick_Handler(void)
 {
- 
 }
 
-/******************************************************************************/
-/*                 STM32F4xx Peripherals Interrupt Handlers                   */
-/*  Add here the Interrupt Handler for the used peripheral(s) (PPP), for the  */
-/*  available peripheral interrupt handler's name please refer to the startup */
-/*  file (startup_stm32f4xx.s).                                               */
-/******************************************************************************/
-
-/**
-  * @brief  This function handles PPP interrupt request.
-  * @param  None
-  * @retval None
-  */
-/*void PPP_IRQHandler(void)
+void EXTI1_IRQHandler(void)
 {
-}*/
+    if (EXTI_GetITStatus(EXTI_Line1) != RESET) {
+        EXTI_ClearITPendingBit(EXTI_Line1);
+        try_run_action(EXTI_Line1);
+    }
+}
 
-/**
-  * @}
-  */ 
+void EXTI15_10_IRQHandler(void)
+{
+    if (EXTI_GetITStatus(EXTI_Line13) != RESET) {
+        EXTI_ClearITPendingBit(EXTI_Line13);
+        try_run_action(EXTI_Line13);
+    }
+}
 
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+void board_irq_init(void)
+{
+    key_exti_init();
+}
